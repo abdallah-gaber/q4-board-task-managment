@@ -6,10 +6,11 @@ import '../../domain/services/auth_service.dart';
 
 class FirebaseAuthServiceImpl implements AuthService {
   FirebaseAuthServiceImpl(this._auth, {GoogleSignIn? googleSignIn})
-    : _googleSignIn = googleSignIn ?? GoogleSignIn(scopes: ['email']);
+    : _googleSignIn =
+          googleSignIn ?? (kIsWeb ? null : GoogleSignIn(scopes: ['email']));
 
   final FirebaseAuth _auth;
-  final GoogleSignIn _googleSignIn;
+  final GoogleSignIn? _googleSignIn;
 
   @override
   AuthAvailability get availability => AuthAvailability.enabled;
@@ -40,9 +41,19 @@ class FirebaseAuthServiceImpl implements AuthService {
 
   @override
   Future<void> signInWithGoogle() async {
+    if (kIsWeb) {
+      final provider = GoogleAuthProvider()..addScope('email');
+      await _signInOrLinkWithPopup(provider);
+      return;
+    }
+
+    final googleSignIn = _googleSignIn;
+    if (googleSignIn == null) {
+      throw StateError('google-sign-in-unavailable');
+    }
     GoogleSignInAccount? account;
     try {
-      account = await _googleSignIn.signIn();
+      account = await googleSignIn.signIn();
     } catch (error) {
       // Surface the original plugin/Firebase error if available.
       rethrow;
@@ -117,9 +128,10 @@ class FirebaseAuthServiceImpl implements AuthService {
 
   @override
   Future<void> signOut() async {
-    if (!kIsWeb) {
+    final googleSignIn = _googleSignIn;
+    if (!kIsWeb && googleSignIn != null) {
       try {
-        await _googleSignIn.signOut();
+        await googleSignIn.signOut();
       } catch (_) {
         // Firebase sign-out still proceeds even if GoogleSignIn local state is stale.
       }
@@ -146,6 +158,26 @@ class FirebaseAuthServiceImpl implements AuthService {
       }
     }
     await _auth.signInWithCredential(credential);
+  }
+
+  Future<void> _signInOrLinkWithPopup(GoogleAuthProvider provider) async {
+    final current = _auth.currentUser;
+    if (current != null && current.isAnonymous) {
+      try {
+        await current.linkWithPopup(provider);
+        return;
+      } on FirebaseAuthException catch (error) {
+        if (error.code != 'credential-already-in-use' &&
+            error.code != 'provider-already-linked' &&
+            error.code != 'email-already-in-use') {
+          rethrow;
+        }
+        if (error.code == 'provider-already-linked') {
+          return;
+        }
+      }
+    }
+    await _auth.signInWithPopup(provider);
   }
 
   AuthSession _mapUser(User? user) {
