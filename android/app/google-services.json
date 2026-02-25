@@ -12,7 +12,20 @@
           "package_name": "dev.abdallahgaber.q4board"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "958578639713-n204uilj0evi6dbaiqcoagjncur8fpkv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.abdallahgaber.q4board",
+            "certificate_hash": "0606afe5a9f92837affacacd71895b76acf87430"
+          }
+        },
+        {
+          "client_id": "958578639713-qb27i32f1avbrp6vm0dr6rolci03bvrr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDum1DVgECpwQpAox4gsMUmtlSaiiX_D7s"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958578639713-qb27i32f1avbrp6vm0dr6rolci03bvrr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "958578639713-rlj1tvsp3kv84c7qg32npfhe7qj6qqbf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dev.abdallahgaber.q4board"
+              }
+            }
+          ]
         }
       }
     }

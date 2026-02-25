@@ -62,6 +62,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '958578639713',
     projectId: 'q4-board-prod',
     storageBucket: 'q4-board-prod.firebasestorage.app',
+    androidClientId: '958578639713-n204uilj0evi6dbaiqcoagjncur8fpkv.apps.googleusercontent.com',
+    iosClientId: '958578639713-rlj1tvsp3kv84c7qg32npfhe7qj6qqbf.apps.googleusercontent.com',
     iosBundleId: 'dev.abdallahgaber.q4board',
   );
 
