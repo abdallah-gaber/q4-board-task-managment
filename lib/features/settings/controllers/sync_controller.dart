@@ -310,7 +310,12 @@ class SyncController extends StateNotifier<SyncControllerState> {
       clearLastError: true,
     );
     try {
-      return await action().timeout(_operationTimeout);
+      final timeout = _timeoutForAction(actionType);
+      final future = action();
+      if (timeout == null) {
+        return await future;
+      }
+      return await future.timeout(timeout);
     } on TimeoutException catch (error) {
       state = state.copyWith(
         lastError: SyncActionError(
@@ -336,6 +341,20 @@ class SyncController extends StateNotifier<SyncControllerState> {
       rethrow;
     } finally {
       state = state.copyWith(isBusy: false);
+    }
+  }
+
+  Duration? _timeoutForAction(SyncActionType actionType) {
+    switch (actionType) {
+      case SyncActionType.push:
+      case SyncActionType.pull:
+        return _operationTimeout;
+      case SyncActionType.signIn:
+      case SyncActionType.signInGoogle:
+      case SyncActionType.signInEmail:
+      case SyncActionType.registerEmail:
+      case SyncActionType.signOut:
+        return null;
     }
   }
 
