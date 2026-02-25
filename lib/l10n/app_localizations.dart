@@ -463,6 +463,90 @@ abstract class AppLocalizations {
   /// **'Conflict details (note IDs)'**
   String get syncConflictDetailsTitle;
 
+  /// No description provided for @syncSignInGuestAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get syncSignInGuestAction;
+
+  /// No description provided for @syncSignInGoogleAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get syncSignInGoogleAction;
+
+  /// No description provided for @syncEmailSignInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email'**
+  String get syncEmailSignInAction;
+
+  /// No description provided for @syncEmailRegisterAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get syncEmailRegisterAction;
+
+  /// No description provided for @syncUpgradeWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade guest with Google'**
+  String get syncUpgradeWithGoogle;
+
+  /// No description provided for @syncUpgradeWithEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade guest with email'**
+  String get syncUpgradeWithEmail;
+
+  /// No description provided for @syncGuestUpgradeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest accounts are device-specific. Upgrade to Google or email/password for cross-device sync.'**
+  String get syncGuestUpgradeHint;
+
+  /// No description provided for @syncAccountGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Guest (anonymous)'**
+  String get syncAccountGuest;
+
+  /// No description provided for @syncAccountGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Google'**
+  String get syncAccountGoogle;
+
+  /// No description provided for @syncAccountGoogleEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Google ({email})'**
+  String syncAccountGoogleEmail(String email);
+
+  /// No description provided for @syncAccountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Email/password'**
+  String get syncAccountEmail;
+
+  /// No description provided for @syncAccountEmailValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: {email}'**
+  String syncAccountEmailValue(String email);
+
+  /// No description provided for @syncAccountApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Apple'**
+  String get syncAccountApple;
+
+  /// No description provided for @syncAccountUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Account: Signed in'**
+  String get syncAccountUnknown;
+
   /// No description provided for @syncSignIn.
   ///
   /// In en, this message translates to:
@@ -487,6 +571,30 @@ abstract class AppLocalizations {
   /// **'Pull'**
   String get syncPull;
 
+  /// No description provided for @syncSignedInGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as guest'**
+  String get syncSignedInGuest;
+
+  /// No description provided for @syncSignedInGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Google'**
+  String get syncSignedInGoogle;
+
+  /// No description provided for @syncSignedInEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with email/password'**
+  String get syncSignedInEmail;
+
+  /// No description provided for @syncEmailRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Email account created and linked'**
+  String get syncEmailRegistered;
+
   /// No description provided for @syncSignedIn.
   ///
   /// In en, this message translates to:
@@ -498,6 +606,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signed out'**
   String get syncSignedOut;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address'**
+  String get emailInvalid;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMinLength;
 
   /// No description provided for @syncErrorGeneric.
   ///
@@ -570,6 +714,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Too many requests. Please wait and retry.'**
   String get syncErrorTooManyRequests;
+
+  /// No description provided for @syncErrorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this email'**
+  String get syncErrorUserNotFound;
+
+  /// No description provided for @syncErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password is incorrect'**
+  String get syncErrorInvalidCredentials;
+
+  /// No description provided for @syncErrorEmailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already in use. Sign in instead.'**
+  String get syncErrorEmailAlreadyInUse;
+
+  /// No description provided for @syncErrorWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too weak (minimum 6 characters).'**
+  String get syncErrorWeakPassword;
+
+  /// No description provided for @syncErrorInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'The email address is invalid.'**
+  String get syncErrorInvalidEmail;
+
+  /// No description provided for @syncErrorAccountExistsDifferentProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already linked to another sign-in method.'**
+  String get syncErrorAccountExistsDifferentProvider;
+
+  /// No description provided for @syncErrorGoogleCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in was canceled.'**
+  String get syncErrorGoogleCanceled;
+
+  /// No description provided for @syncErrorGoogleTokenMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in did not return tokens. Refresh config files and retry.'**
+  String get syncErrorGoogleTokenMissing;
 
   /// No description provided for @syncErrorRetryHint.
   ///

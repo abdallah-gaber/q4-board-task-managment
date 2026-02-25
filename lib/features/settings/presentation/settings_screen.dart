@@ -13,6 +13,7 @@ import '../../../domain/entities/app_settings_entity.dart';
 import '../../../domain/enums/app_language_mode.dart';
 import '../../../domain/enums/theme_preference.dart';
 import '../../../domain/repositories/sync_repository.dart';
+import '../../../domain/services/auth_service.dart';
 import '../controllers/settings_controller.dart';
 import '../controllers/sync_controller.dart';
 
@@ -95,7 +96,13 @@ class SettingsScreen extends ConsumerWidget {
             child: _SyncSection(
               appSettings: settings,
               state: syncState,
-              onSignIn: () => _onSyncSignIn(context, syncController),
+              onSignInGuest: () => _onSyncSignInGuest(context, syncController),
+              onSignInGoogle: () =>
+                  _onSyncSignInGoogle(context, syncController),
+              onSignInEmail: () =>
+                  _onSyncEmailAuth(context, syncController, register: false),
+              onRegisterEmail: () =>
+                  _onSyncEmailAuth(context, syncController, register: true),
               onSignOut: () => _onSyncSignOut(context, syncController),
               onPush: () => _onSyncPush(context, syncController),
               onPull: () => _onSyncPull(context, syncController),
@@ -182,7 +189,7 @@ class SettingsScreen extends ConsumerWidget {
       ..showSnackBar(SnackBar(content: Text(l10n.localDataResetSuccess)));
   }
 
-  Future<void> _onSyncSignIn(
+  Future<void> _onSyncSignInGuest(
     BuildContext context,
     SyncController controller,
   ) async {
@@ -194,9 +201,9 @@ class SettingsScreen extends ConsumerWidget {
       }
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l10n.syncSignedIn)));
+        ..showSnackBar(SnackBar(content: Text(l10n.syncSignedInGuest)));
     } catch (error, stackTrace) {
-      _logSyncError('signIn', error, stackTrace);
+      _logSyncError('signInGuest', error, stackTrace);
       if (!context.mounted) {
         return;
       }
@@ -204,6 +211,177 @@ class SettingsScreen extends ConsumerWidget {
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(_syncErrorMessage(l10n, error))));
     }
+  }
+
+  Future<void> _onSyncSignInGoogle(
+    BuildContext context,
+    SyncController controller,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await controller.signInWithGoogle();
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l10n.syncSignedInGoogle)));
+    } catch (error, stackTrace) {
+      _logSyncError('signInGoogle', error, stackTrace);
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(_syncErrorMessage(l10n, error))));
+    }
+  }
+
+  Future<void> _onSyncEmailAuth(
+    BuildContext context,
+    SyncController controller, {
+    required bool register,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final credentials = await _showEmailAuthDialog(context, register: register);
+    if (credentials == null || !context.mounted) {
+      return;
+    }
+
+    try {
+      if (register) {
+        await controller.registerWithEmailPassword(
+          email: credentials.email,
+          password: credentials.password,
+        );
+      } else {
+        await controller.signInWithEmailPassword(
+          email: credentials.email,
+          password: credentials.password,
+        );
+      }
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              register ? l10n.syncEmailRegistered : l10n.syncSignedInEmail,
+            ),
+          ),
+        );
+    } catch (error, stackTrace) {
+      _logSyncError(
+        register ? 'registerEmail' : 'signInEmail',
+        error,
+        stackTrace,
+      );
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(_syncErrorMessage(l10n, error))));
+    }
+  }
+
+  Future<_EmailCredentials?> _showEmailAuthDialog(
+    BuildContext context, {
+    required bool register,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final formKey = GlobalKey<FormState>();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    final result = await showDialog<_EmailCredentials>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(
+            register
+                ? l10n.syncEmailRegisterAction
+                : l10n.syncEmailSignInAction,
+          ),
+          content: Form(
+            key: formKey,
+            child: SizedBox(
+              width: 360,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
+                    decoration: InputDecoration(labelText: l10n.emailLabel),
+                    validator: (value) {
+                      final trimmed = value?.trim() ?? '';
+                      if (trimmed.isEmpty) {
+                        return l10n.emailRequired;
+                      }
+                      if (!trimmed.contains('@') || !trimmed.contains('.')) {
+                        return l10n.emailInvalid;
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    autofillHints: register
+                        ? const [AutofillHints.newPassword]
+                        : const [AutofillHints.password],
+                    decoration: InputDecoration(labelText: l10n.passwordLabel),
+                    validator: (value) {
+                      final raw = value ?? '';
+                      if (raw.isEmpty) {
+                        return l10n.passwordRequired;
+                      }
+                      if (register && raw.length < 6) {
+                        return l10n.passwordMinLength;
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (!(formKey.currentState?.validate() ?? false)) {
+                  return;
+                }
+                Navigator.of(dialogContext).pop(
+                  _EmailCredentials(
+                    email: emailController.text.trim(),
+                    password: passwordController.text,
+                  ),
+                );
+              },
+              child: Text(
+                register
+                    ? l10n.syncEmailRegisterAction
+                    : l10n.syncEmailSignInAction,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    emailController.dispose();
+    passwordController.dispose();
+    return result;
   }
 
   Future<void> _onSyncSignOut(
@@ -334,9 +512,29 @@ class SettingsScreen extends ConsumerWidget {
           return l10n.syncErrorNetwork;
         case 'too-many-requests':
           return l10n.syncErrorTooManyRequests;
+        case 'user-not-found':
+          return l10n.syncErrorUserNotFound;
+        case 'wrong-password':
+        case 'invalid-credential':
+          return l10n.syncErrorInvalidCredentials;
+        case 'email-already-in-use':
+          return l10n.syncErrorEmailAlreadyInUse;
+        case 'weak-password':
+          return l10n.syncErrorWeakPassword;
+        case 'invalid-email':
+          return l10n.syncErrorInvalidEmail;
+        case 'account-exists-with-different-credential':
+          return l10n.syncErrorAccountExistsDifferentProvider;
         default:
           return '${l10n.syncErrorGeneric}: ${error.code}';
       }
+    }
+    final text = error.toString();
+    if (text.contains('google-sign-in-cancelled')) {
+      return l10n.syncErrorGoogleCanceled;
+    }
+    if (text.contains('google-sign-in-missing-token')) {
+      return l10n.syncErrorGoogleTokenMissing;
     }
     if (error is FirebaseException) {
       switch (error.code) {
@@ -384,7 +582,10 @@ class _SyncSection extends StatelessWidget {
   const _SyncSection({
     required this.appSettings,
     required this.state,
-    required this.onSignIn,
+    required this.onSignInGuest,
+    required this.onSignInGoogle,
+    required this.onSignInEmail,
+    required this.onRegisterEmail,
     required this.onSignOut,
     required this.onPush,
     required this.onPull,
@@ -397,7 +598,10 @@ class _SyncSection extends StatelessWidget {
 
   final AppSettingsEntity appSettings;
   final SyncControllerState state;
-  final VoidCallback onSignIn;
+  final VoidCallback onSignInGuest;
+  final VoidCallback onSignInGoogle;
+  final VoidCallback onSignInEmail;
+  final VoidCallback onRegisterEmail;
   final VoidCallback onSignOut;
   final VoidCallback onPush;
   final VoidCallback onPull;
@@ -417,6 +621,9 @@ class _SyncSection extends StatelessWidget {
     final autoSyncOnResumeEnabled = appSettings.autoSyncOnResumeEnabled;
     final autoPushLocalChangesEnabled = appSettings.autoPushLocalChangesEnabled;
     final actionsEnabled = canUseCloud && cloudSyncEnabled;
+    final canAuthButtons = actionsEnabled && !state.isBusy;
+    final isAnonymous =
+        state.session.isAuthenticated && state.session.isAnonymous;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,10 +689,24 @@ class _SyncSection extends StatelessWidget {
         if (state.session.userId != null) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
+            _accountSummaryText(context, state.session),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
             l10n.syncUserId(state.session.userId!),
             style: Theme.of(context).textTheme.bodySmall,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+          ),
+        ],
+        if (isAnonymous) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.syncGuestUpgradeHint,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
         ],
         if (appSettings.lastSyncAt != null) ...[
@@ -508,11 +729,32 @@ class _SyncSection extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             FilledButton.tonalIcon(
-              onPressed: (!actionsEnabled || state.isBusy || isSignedIn)
-                  ? null
-                  : onSignIn,
+              onPressed: (!canAuthButtons || isSignedIn) ? null : onSignInGuest,
               icon: const Icon(Icons.login_outlined),
-              label: Text(l10n.syncSignIn),
+              label: Text(l10n.syncSignInGuestAction),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: !canAuthButtons ? null : onSignInGoogle,
+              icon: const Icon(Icons.g_mobiledata_rounded),
+              label: Text(
+                isAnonymous
+                    ? l10n.syncUpgradeWithGoogle
+                    : l10n.syncSignInGoogleAction,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: !canAuthButtons ? null : onSignInEmail,
+              icon: const Icon(Icons.alternate_email_outlined),
+              label: Text(
+                isAnonymous
+                    ? l10n.syncUpgradeWithEmail
+                    : l10n.syncEmailSignInAction,
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: !canAuthButtons ? null : onRegisterEmail,
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+              label: Text(l10n.syncEmailRegisterAction),
             ),
             FilledButton.tonalIcon(
               onPressed: (!actionsEnabled || state.isBusy || !isSignedIn)
@@ -629,6 +871,29 @@ class _SyncSection extends StatelessWidget {
       case SyncStatusCode.error:
         return l10n.syncStatusError;
     }
+  }
+
+  String _accountSummaryText(BuildContext context, AuthSession session) {
+    final l10n = AppLocalizations.of(context)!;
+    if (!session.isAuthenticated) {
+      return l10n.syncNotSignedIn;
+    }
+    return switch (session.providerKind) {
+      AuthProviderKind.anonymous => l10n.syncAccountGuest,
+      AuthProviderKind.google =>
+        session.email == null
+            ? l10n.syncAccountGoogle
+            : l10n.syncAccountGoogleEmail(session.email!),
+      AuthProviderKind.emailPassword =>
+        session.email == null
+            ? l10n.syncAccountEmail
+            : l10n.syncAccountEmailValue(session.email!),
+      AuthProviderKind.apple => l10n.syncAccountApple,
+      AuthProviderKind.none || AuthProviderKind.unknown =>
+        session.email == null
+            ? l10n.syncAccountUnknown
+            : l10n.syncAccountEmailValue(session.email!),
+    };
   }
 
   String _syncSuccessText(AppLocalizations l10n, SyncStatusSnapshot status) {
@@ -915,4 +1180,11 @@ class _SectionCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EmailCredentials {
+  const _EmailCredentials({required this.email, required this.password});
+
+  final String email;
+  final String password;
 }

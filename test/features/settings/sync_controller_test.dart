@@ -281,6 +281,21 @@ class _FakeAuthService implements AuthService {
   Future<void> signIn() async {}
 
   @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -423,6 +438,21 @@ class _MutableAuthService implements AuthService {
 
   @override
   Future<void> signIn() async {}
+
+  @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
 
   @override
   Future<void> signOut() async {}

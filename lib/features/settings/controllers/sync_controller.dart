@@ -78,7 +78,15 @@ class SyncControllerState {
   bool get canRetryLastAction => !isBusy && (lastError?.isRetryable ?? false);
 }
 
-enum SyncActionType { signIn, signOut, push, pull }
+enum SyncActionType {
+  signIn,
+  signInGoogle,
+  signInEmail,
+  registerEmail,
+  signOut,
+  push,
+  pull,
+}
 
 enum SyncConflictResolution { localKept, remoteKept }
 
@@ -182,6 +190,29 @@ class SyncController extends StateNotifier<SyncControllerState> {
 
   Future<void> signIn() => _runBusy(SyncActionType.signIn, _authService.signIn);
 
+  Future<void> signInWithGoogle() =>
+      _runBusy(SyncActionType.signInGoogle, _authService.signInWithGoogle);
+
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) => _runBusy(
+    SyncActionType.signInEmail,
+    () =>
+        _authService.signInWithEmailPassword(email: email, password: password),
+  );
+
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) => _runBusy(
+    SyncActionType.registerEmail,
+    () => _authService.registerWithEmailPassword(
+      email: email,
+      password: password,
+    ),
+  );
+
   Future<void> signOut() =>
       _runBusy(SyncActionType.signOut, _authService.signOut);
 
@@ -222,6 +253,11 @@ class SyncController extends StateNotifier<SyncControllerState> {
     switch (state.lastAction) {
       case SyncActionType.signIn:
         return signIn();
+      case SyncActionType.signInGoogle:
+        return signInWithGoogle();
+      case SyncActionType.signInEmail:
+      case SyncActionType.registerEmail:
+        return;
       case SyncActionType.signOut:
         return signOut();
       case SyncActionType.push:
@@ -291,7 +327,10 @@ class SyncController extends StateNotifier<SyncControllerState> {
           action: actionType,
           rawError: error,
           isTimeout: false,
-          isRetryable: actionType != SyncActionType.signOut,
+          isRetryable:
+              actionType != SyncActionType.signOut &&
+              actionType != SyncActionType.signInEmail &&
+              actionType != SyncActionType.registerEmail,
         ),
       );
       rethrow;
