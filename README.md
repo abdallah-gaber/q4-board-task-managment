@@ -25,6 +25,7 @@ It helps you classify tasks into 4 quadrants and prioritize execution with a sti
 ## Phase 2 (In Progress)
 
 - Firebase anonymous authentication (settings-driven sign in/out)
+- Provider sign-in options (Google + Email/Password) for cross-device sync (Phase 2b in progress)
 - Firestore cloud sync with manual actions (Push / Pull)
 - Live sync listener after sign-in (remote changes pulled automatically)
 - Auto-pull on app resume with throttling
@@ -68,6 +69,31 @@ flutterfire configure --project=q4-board-prod
 ```
 
 Then replace the placeholder `lib/firebase_options.dart` with the generated file.
+
+### Cross-device sync note (important)
+
+Anonymous auth is useful for testing and guest usage, but it is **not portable across devices**.  
+For real cross-device sync, sign in with a persistent provider (Google or Email/Password).
+
+### Google sign-in setup (Android/macOS/Web)
+
+If Firebase shows a dialog asking you to download updated config files after enabling Google sign-in, do this:
+
+1. Add Android SHA fingerprints in Firebase:
+   ```bash
+   cd android
+   ./gradlew signingReport
+   ```
+   Copy the **SHA-1** (and recommended SHA-256) for your app into Firebase Project Settings > Your Android app (`dev.abdallahgaber.q4board`).
+2. Download and replace `android/app/google-services.json`.
+3. Download and replace `macos/Runner/GoogleService-Info.plist`.
+4. Re-run FlutterFire config so `lib/firebase_options.dart` includes the new OAuth clients:
+   ```bash
+   flutterfire configure --project=q4-board-prod
+   ```
+5. Add your deployed web domain to Firebase Auth authorized domains (for example `q4.abdallahgaber.dev`).
+
+For macOS Google sign-in, you may also need to add the `REVERSED_CLIENT_ID` from `GoogleService-Info.plist` as a URL scheme in `macos/Runner/Info.plist`.
 
 ### Firestore rules (required for sync)
 

@@ -21,6 +21,17 @@ flutterfire configure --project=q4-board-prod
 The repo may include a placeholder `lib/firebase_options.dart` for local-only mode.
 Replace it with the generated FlutterFire file when working on cloud features.
 
+### Provider auth (Google / Email) for cross-device sync
+
+- Anonymous auth is not portable across devices. Use Google or Email/Password for real cross-device sync.
+- After enabling Google sign-in in Firebase Auth, Firebase creates OAuth clients and you must refresh config files:
+  - add Android SHA-1/SHA-256 fingerprints (via `./gradlew signingReport`)
+  - replace `android/app/google-services.json`
+  - replace `macos/Runner/GoogleService-Info.plist`
+  - rerun `flutterfire configure --project=q4-board-prod`
+- Add deployed web domains (e.g. `q4.abdallahgaber.dev`) to Firebase Auth authorized domains.
+- For macOS Google sign-in, add `REVERSED_CLIENT_ID` URL scheme in `macos/Runner/Info.plist` if sign-in does not return to the app.
+
 ## Firestore Rules
 
 - Rules are defined in `firestore.rules`.
