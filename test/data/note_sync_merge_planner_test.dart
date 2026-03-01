@@ -23,7 +23,7 @@ void main() {
       expect(plan.skippedConflicts, 1);
     });
 
-    test('pull applies newer remote and deletes missing local notes', () {
+    test('pull applies newer remote and keeps missing local notes', () {
       final localA = _note(id: 'a', updatedAt: DateTime(2026, 1, 1, 10));
       final localB = _note(id: 'b', updatedAt: DateTime(2026, 1, 1, 10));
       final remoteANewer = _note(id: 'a', updatedAt: DateTime(2026, 1, 1, 11));
@@ -35,9 +35,10 @@ void main() {
       );
 
       expect(plan.upserts.map((e) => e.id), ['a', 'c']);
-      expect(plan.deletes, ['b']);
+      expect(plan.deletes, isEmpty);
       expect(plan.skippedConflicts, 0);
       expect(plan.skippedEmptyRemoteDelete, isFalse);
+      expect(plan.skippedMissingRemoteDelete, isTrue);
     });
 
     test('pull does not wipe local notes when remote is empty', () {
@@ -54,6 +55,7 @@ void main() {
       expect(plan.upserts, isEmpty);
       expect(plan.deletes, isEmpty);
       expect(plan.skippedEmptyRemoteDelete, isTrue);
+      expect(plan.skippedMissingRemoteDelete, isTrue);
     });
   });
 }
