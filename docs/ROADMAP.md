@@ -18,6 +18,7 @@
 - Selective sync controls and persisted sync status metadata
 - Conflict activity history + per-note conflict details in Settings
 - Optional auto-push for local changes (debounced; default off)
+- Next: provider auth portability (Google + Email/Password) with anonymous account upgrade/linking UX
 - Next: emulator-backed sync CI/test automation and conflict resolution UX (beyond last-write-wins visibility)
 
 ## Phase 3+ (Candidate)

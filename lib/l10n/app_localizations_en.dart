@@ -210,6 +210,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncConflictDetailsTitle => 'Conflict details (note IDs)';
 
   @override
+  String get syncSignInGuestAction => 'Continue as guest';
+
+  @override
+  String get syncSignInGoogleAction => 'Sign in with Google';
+
+  @override
+  String get syncEmailSignInAction => 'Sign in with email';
+
+  @override
+  String get syncEmailRegisterAction => 'Create account';
+
+  @override
+  String get syncUpgradeWithGoogle => 'Upgrade guest with Google';
+
+  @override
+  String get syncUpgradeWithEmail => 'Upgrade guest with email';
+
+  @override
+  String get syncGuestUpgradeHint =>
+      'Guest accounts are device-specific. Upgrade to Google or email/password for cross-device sync.';
+
+  @override
+  String get syncAccountGuest => 'Account: Guest (anonymous)';
+
+  @override
+  String get syncAccountGoogle => 'Account: Google';
+
+  @override
+  String syncAccountGoogleEmail(String email) {
+    return 'Account: Google ($email)';
+  }
+
+  @override
+  String get syncAccountEmail => 'Account: Email/password';
+
+  @override
+  String syncAccountEmailValue(String email) {
+    return 'Account: $email';
+  }
+
+  @override
+  String get syncAccountApple => 'Account: Apple';
+
+  @override
+  String get syncAccountUnknown => 'Account: Signed in';
+
+  @override
   String get syncSignIn => 'Sign in';
 
   @override
@@ -222,10 +269,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncPull => 'Pull';
 
   @override
+  String get syncSignedInGuest => 'Signed in as guest';
+
+  @override
+  String get syncSignedInGoogle => 'Signed in with Google';
+
+  @override
+  String get syncSignedInEmail => 'Signed in with email/password';
+
+  @override
+  String get syncEmailRegistered => 'Email account created and linked';
+
+  @override
   String get syncSignedIn => 'Signed in successfully';
 
   @override
   String get syncSignedOut => 'Signed out';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get emailInvalid => 'Enter a valid email address';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 6 characters';
 
   @override
   String get syncErrorGeneric => 'Cloud sync action failed';
@@ -271,6 +348,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get syncErrorTooManyRequests =>
       'Too many requests. Please wait and retry.';
+
+  @override
+  String get syncErrorUserNotFound => 'No account found for this email';
+
+  @override
+  String get syncErrorInvalidCredentials => 'Email or password is incorrect';
+
+  @override
+  String get syncErrorEmailAlreadyInUse =>
+      'This email is already in use. Sign in instead.';
+
+  @override
+  String get syncErrorWeakPassword =>
+      'Password is too weak (minimum 6 characters).';
+
+  @override
+  String get syncErrorInvalidEmail => 'The email address is invalid.';
+
+  @override
+  String get syncErrorAccountExistsDifferentProvider =>
+      'This email is already linked to another sign-in method.';
+
+  @override
+  String get syncErrorGoogleCanceled => 'Google sign-in was canceled.';
+
+  @override
+  String get syncErrorGoogleTokenMissing =>
+      'Google sign-in did not return tokens. Refresh config files and retry.';
 
   @override
   String get syncErrorRetryHint =>

@@ -69,6 +69,39 @@ void main() {
       expect(controller.state.isBusy, isFalse);
     });
 
+    test('google sign-in is not forced to sync timeout window', () async {
+      final auth = _DelayedGoogleAuthService();
+      final notes = _FakeNoteRepository();
+      final controller = SyncController(
+        authService: auth,
+        noteRepository: notes,
+        syncRepository: _TrackingSyncRepository(),
+        settingsRepository: _FakeSettingsRepository(),
+        bootstrapState: const FirebaseBootstrapState(
+          isAvailable: true,
+          isConfigured: true,
+        ),
+        operationTimeout: const Duration(milliseconds: 10),
+      );
+      addTearDown(() async {
+        controller.dispose();
+        await notes.dispose();
+        await auth.dispose();
+      });
+
+      final future = controller.signInWithGoogle();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      expect(controller.state.isBusy, isTrue);
+      expect(controller.state.lastError, isNull);
+
+      auth.complete();
+      await future;
+
+      expect(controller.state.isBusy, isFalse);
+      expect(controller.state.lastError, isNull);
+    });
+
     test('starts live sync on sign in and stops on sign out', () async {
       final auth = _MutableAuthService();
       final repo = _TrackingSyncRepository();
@@ -281,6 +314,21 @@ class _FakeAuthService implements AuthService {
   Future<void> signIn() async {}
 
   @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -425,6 +473,21 @@ class _MutableAuthService implements AuthService {
   Future<void> signIn() async {}
 
   @override
+  Future<void> signInWithGoogle() async {}
+
+  @override
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -435,6 +498,52 @@ class _MutableAuthService implements AuthService {
   });
 
   Future<void> dispose() => _controller.close();
+}
+
+class _DelayedGoogleAuthService implements AuthService {
+  final _googleCompleter = Completer<void>();
+
+  @override
+  AuthAvailability get availability => AuthAvailability.enabled;
+
+  @override
+  AuthSession get currentSession =>
+      const AuthSession(userId: null, isAuthenticated: false);
+
+  void complete() {
+    if (!_googleCompleter.isCompleted) {
+      _googleCompleter.complete();
+    }
+  }
+
+  @override
+  Future<void> signIn() async {}
+
+  @override
+  Future<void> signInWithGoogle() => _googleCompleter.future;
+
+  @override
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {}
+
+  @override
+  Future<void> signOut() async {}
+
+  @override
+  Stream<AuthSession> watchSession() =>
+      Stream<AuthSession>.value(currentSession);
+
+  Future<void> dispose() async {
+    complete();
+  }
 }
 
 NoteEntity _testNote(String id) {

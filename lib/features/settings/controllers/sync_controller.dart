@@ -78,7 +78,15 @@ class SyncControllerState {
   bool get canRetryLastAction => !isBusy && (lastError?.isRetryable ?? false);
 }
 
-enum SyncActionType { signIn, signOut, push, pull }
+enum SyncActionType {
+  signIn,
+  signInGoogle,
+  signInEmail,
+  registerEmail,
+  signOut,
+  push,
+  pull,
+}
 
 enum SyncConflictResolution { localKept, remoteKept }
 
@@ -182,6 +190,29 @@ class SyncController extends StateNotifier<SyncControllerState> {
 
   Future<void> signIn() => _runBusy(SyncActionType.signIn, _authService.signIn);
 
+  Future<void> signInWithGoogle() =>
+      _runBusy(SyncActionType.signInGoogle, _authService.signInWithGoogle);
+
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) => _runBusy(
+    SyncActionType.signInEmail,
+    () =>
+        _authService.signInWithEmailPassword(email: email, password: password),
+  );
+
+  Future<void> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) => _runBusy(
+    SyncActionType.registerEmail,
+    () => _authService.registerWithEmailPassword(
+      email: email,
+      password: password,
+    ),
+  );
+
   Future<void> signOut() =>
       _runBusy(SyncActionType.signOut, _authService.signOut);
 
@@ -222,6 +253,11 @@ class SyncController extends StateNotifier<SyncControllerState> {
     switch (state.lastAction) {
       case SyncActionType.signIn:
         return signIn();
+      case SyncActionType.signInGoogle:
+        return signInWithGoogle();
+      case SyncActionType.signInEmail:
+      case SyncActionType.registerEmail:
+        return;
       case SyncActionType.signOut:
         return signOut();
       case SyncActionType.push:
@@ -274,7 +310,12 @@ class SyncController extends StateNotifier<SyncControllerState> {
       clearLastError: true,
     );
     try {
-      return await action().timeout(_operationTimeout);
+      final timeout = _timeoutForAction(actionType);
+      final future = action();
+      if (timeout == null) {
+        return await future;
+      }
+      return await future.timeout(timeout);
     } on TimeoutException catch (error) {
       state = state.copyWith(
         lastError: SyncActionError(
@@ -291,12 +332,29 @@ class SyncController extends StateNotifier<SyncControllerState> {
           action: actionType,
           rawError: error,
           isTimeout: false,
-          isRetryable: actionType != SyncActionType.signOut,
+          isRetryable:
+              actionType != SyncActionType.signOut &&
+              actionType != SyncActionType.signInEmail &&
+              actionType != SyncActionType.registerEmail,
         ),
       );
       rethrow;
     } finally {
       state = state.copyWith(isBusy: false);
+    }
+  }
+
+  Duration? _timeoutForAction(SyncActionType actionType) {
+    switch (actionType) {
+      case SyncActionType.push:
+      case SyncActionType.pull:
+        return _operationTimeout;
+      case SyncActionType.signIn:
+      case SyncActionType.signInGoogle:
+      case SyncActionType.signInEmail:
+      case SyncActionType.registerEmail:
+      case SyncActionType.signOut:
+        return null;
     }
   }
 

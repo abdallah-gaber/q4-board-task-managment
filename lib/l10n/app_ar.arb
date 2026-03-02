@@ -90,12 +90,50 @@
   "syncConflictReviewHint": "راجع تفاصيل التعارض لمعرفة معرّفات الملاحظات المتأثرة.",
   "syncConflictDetailsAction": "تفاصيل التعارض",
   "syncConflictDetailsTitle": "تفاصيل التعارض (معرّفات الملاحظات)",
+  "syncSignInGuestAction": "المتابعة كضيف",
+  "syncSignInGoogleAction": "تسجيل الدخول عبر Google",
+  "syncEmailSignInAction": "تسجيل الدخول بالبريد الإلكتروني",
+  "syncEmailRegisterAction": "إنشاء حساب",
+  "syncUpgradeWithGoogle": "ترقية حساب الضيف عبر Google",
+  "syncUpgradeWithEmail": "ترقية حساب الضيف بالبريد الإلكتروني",
+  "syncGuestUpgradeHint": "حساب الضيف مرتبط بهذا الجهاز فقط. قم بالترقية إلى Google أو البريد الإلكتروني للمزامنة بين الأجهزة.",
+  "syncAccountGuest": "الحساب: ضيف (مجهول)",
+  "syncAccountGoogle": "الحساب: Google",
+  "syncAccountGoogleEmail": "الحساب: Google ({email})",
+  "@syncAccountGoogleEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "syncAccountEmail": "الحساب: بريد إلكتروني/كلمة مرور",
+  "syncAccountEmailValue": "الحساب: {email}",
+  "@syncAccountEmailValue": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "syncAccountApple": "الحساب: Apple",
+  "syncAccountUnknown": "الحساب: تم تسجيل الدخول",
   "syncSignIn": "تسجيل الدخول",
   "syncSignOut": "تسجيل الخروج",
   "syncPush": "رفع",
   "syncPull": "سحب",
+  "syncSignedInGuest": "تم تسجيل الدخول كضيف",
+  "syncSignedInGoogle": "تم تسجيل الدخول عبر Google",
+  "syncSignedInEmail": "تم تسجيل الدخول بالبريد الإلكتروني/كلمة المرور",
+  "syncEmailRegistered": "تم إنشاء حساب البريد وربطه",
   "syncSignedIn": "تم تسجيل الدخول بنجاح",
   "syncSignedOut": "تم تسجيل الخروج",
+  "emailLabel": "البريد الإلكتروني",
+  "passwordLabel": "كلمة المرور",
+  "emailRequired": "البريد الإلكتروني مطلوب",
+  "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   "syncErrorGeneric": "فشلت عملية المزامنة السحابية",
   "syncErrorTimeout": "انتهت مهلة المزامنة. حاول مرة أخرى.",
   "syncErrorTimeoutHelp": "استغرقت العملية وقتًا طويلًا. تحقّق من الاتصال ثم أعد المحاولة.",
@@ -108,6 +146,14 @@
   "syncErrorAuthOperationHelp": "فعّل Anonymous Sign-in من Firebase Console > Authentication > Sign-in method.",
   "syncErrorFirestoreSetup": "قاعدة Firestore غير جاهزة لهذا المشروع بعد",
   "syncErrorTooManyRequests": "عدد الطلبات كبير جدًا. انتظر قليلًا ثم أعد المحاولة.",
+  "syncErrorUserNotFound": "لا يوجد حساب لهذا البريد الإلكتروني",
+  "syncErrorInvalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+  "syncErrorEmailAlreadyInUse": "هذا البريد مستخدم بالفعل. سجّل الدخول بدلًا من ذلك.",
+  "syncErrorWeakPassword": "كلمة المرور ضعيفة جدًا (الحد الأدنى 6 أحرف).",
+  "syncErrorInvalidEmail": "صيغة البريد الإلكتروني غير صحيحة.",
+  "syncErrorAccountExistsDifferentProvider": "هذا البريد مرتبط بطريقة تسجيل دخول أخرى.",
+  "syncErrorGoogleCanceled": "تم إلغاء تسجيل الدخول عبر Google.",
+  "syncErrorGoogleTokenMissing": "لم تُرجع Google رموز الدخول. حدّث ملفات الإعداد وأعد المحاولة.",
   "syncErrorRetryHint": "يمكنك إعادة محاولة آخر عملية مزامنة بعد إصلاح السبب.",
   "syncRetrySuccess": "تمت إعادة محاولة عملية المزامنة",
   "retryAction": "إعادة المحاولة",

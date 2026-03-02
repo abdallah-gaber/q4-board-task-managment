@@ -7,6 +7,7 @@ class SyncMergePlan {
     required this.skippedConflicts,
     required this.skippedConflictNoteIds,
     this.skippedEmptyRemoteDelete = false,
+    this.skippedMissingRemoteDelete = false,
   });
 
   final List<NoteEntity> upserts;
@@ -14,6 +15,7 @@ class SyncMergePlan {
   final int skippedConflicts;
   final List<String> skippedConflictNoteIds;
   final bool skippedEmptyRemoteDelete;
+  final bool skippedMissingRemoteDelete;
 }
 
 class NoteSyncMergePlanner {
@@ -82,18 +84,23 @@ class NoteSyncMergePlanner {
         skippedConflicts: skippedConflicts,
         skippedConflictNoteIds: skippedConflictNoteIds,
         skippedEmptyRemoteDelete: true,
+        skippedMissingRemoteDelete: localIds.isNotEmpty,
       );
     }
 
-    final deletes = localIds
+    // Safety: pull is non-destructive by default. Remote-missing IDs are kept
+    // locally to avoid accidental local data loss when cloud writes fail or
+    // when switching accounts.
+    final missingRemoteLocalIds = localIds
         .where((id) => !remoteIds.contains(id))
         .toList(growable: false);
 
     return SyncMergePlan(
       upserts: upserts,
-      deletes: deletes,
+      deletes: const <String>[],
       skippedConflicts: skippedConflicts,
       skippedConflictNoteIds: skippedConflictNoteIds,
+      skippedMissingRemoteDelete: missingRemoteLocalIds.isNotEmpty,
     );
   }
 }

@@ -7,9 +7,16 @@ Use this checklist before enabling cloud sync for broader testing or production 
 - [ ] Firebase project selected: `q4-board-prod`
 - [ ] Firestore database created (Native mode)
 - [ ] Authentication enabled: **Anonymous**
+- [ ] Authentication enabled: **Email/Password** (for portable cross-device sync)
+- [ ] Authentication enabled: **Google**
 - [ ] FlutterFire configured and `lib/firebase_options.dart` generated for this repo
 - [ ] Android app package registered as `dev.abdallahgaber.q4board`
 - [ ] macOS app bundle identifier registered as `dev.abdallahgaber.q4board` (if using macOS build)
+- [ ] Android SHA-1 (and SHA-256 recommended) fingerprints added in Firebase Project Settings
+- [ ] Re-download and replace config files after enabling Google sign-in:
+  - [ ] `android/app/google-services.json`
+  - [ ] `macos/Runner/GoogleService-Info.plist`
+- [ ] Firebase Auth authorized domains include deployed web domain (e.g. `q4.abdallahgaber.dev`)
 
 ## Security Rules
 
@@ -25,6 +32,11 @@ firebase deploy --only firestore:rules
 
 ## App Behavior Verification
 
+- [ ] Guest sign-in works (anonymous)
+- [ ] Google sign-in works
+- [ ] Email/password sign-in works
+- [ ] Email/password account creation works
+- [ ] Guest account can be upgraded/linked to Google or Email/Password
 - [ ] Sign in succeeds from Settings
 - [ ] Manual `Push` uploads local notes
 - [ ] Manual `Pull` restores notes on a clean device/profile

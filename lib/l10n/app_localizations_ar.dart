@@ -210,6 +210,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get syncConflictDetailsTitle => 'تفاصيل التعارض (معرّفات الملاحظات)';
 
   @override
+  String get syncSignInGuestAction => 'المتابعة كضيف';
+
+  @override
+  String get syncSignInGoogleAction => 'تسجيل الدخول عبر Google';
+
+  @override
+  String get syncEmailSignInAction => 'تسجيل الدخول بالبريد الإلكتروني';
+
+  @override
+  String get syncEmailRegisterAction => 'إنشاء حساب';
+
+  @override
+  String get syncUpgradeWithGoogle => 'ترقية حساب الضيف عبر Google';
+
+  @override
+  String get syncUpgradeWithEmail => 'ترقية حساب الضيف بالبريد الإلكتروني';
+
+  @override
+  String get syncGuestUpgradeHint =>
+      'حساب الضيف مرتبط بهذا الجهاز فقط. قم بالترقية إلى Google أو البريد الإلكتروني للمزامنة بين الأجهزة.';
+
+  @override
+  String get syncAccountGuest => 'الحساب: ضيف (مجهول)';
+
+  @override
+  String get syncAccountGoogle => 'الحساب: Google';
+
+  @override
+  String syncAccountGoogleEmail(String email) {
+    return 'الحساب: Google ($email)';
+  }
+
+  @override
+  String get syncAccountEmail => 'الحساب: بريد إلكتروني/كلمة مرور';
+
+  @override
+  String syncAccountEmailValue(String email) {
+    return 'الحساب: $email';
+  }
+
+  @override
+  String get syncAccountApple => 'الحساب: Apple';
+
+  @override
+  String get syncAccountUnknown => 'الحساب: تم تسجيل الدخول';
+
+  @override
   String get syncSignIn => 'تسجيل الدخول';
 
   @override
@@ -222,10 +269,41 @@ class AppLocalizationsAr extends AppLocalizations {
   String get syncPull => 'سحب';
 
   @override
+  String get syncSignedInGuest => 'تم تسجيل الدخول كضيف';
+
+  @override
+  String get syncSignedInGoogle => 'تم تسجيل الدخول عبر Google';
+
+  @override
+  String get syncSignedInEmail =>
+      'تم تسجيل الدخول بالبريد الإلكتروني/كلمة المرور';
+
+  @override
+  String get syncEmailRegistered => 'تم إنشاء حساب البريد وربطه';
+
+  @override
   String get syncSignedIn => 'تم تسجيل الدخول بنجاح';
 
   @override
   String get syncSignedOut => 'تم تسجيل الخروج';
+
+  @override
+  String get emailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get passwordLabel => 'كلمة المرور';
+
+  @override
+  String get emailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get emailInvalid => 'أدخل بريدًا إلكترونيًا صالحًا';
+
+  @override
+  String get passwordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String get passwordMinLength => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
 
   @override
   String get syncErrorGeneric => 'فشلت عملية المزامنة السحابية';
@@ -271,6 +349,35 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get syncErrorTooManyRequests =>
       'عدد الطلبات كبير جدًا. انتظر قليلًا ثم أعد المحاولة.';
+
+  @override
+  String get syncErrorUserNotFound => 'لا يوجد حساب لهذا البريد الإلكتروني';
+
+  @override
+  String get syncErrorInvalidCredentials =>
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+  @override
+  String get syncErrorEmailAlreadyInUse =>
+      'هذا البريد مستخدم بالفعل. سجّل الدخول بدلًا من ذلك.';
+
+  @override
+  String get syncErrorWeakPassword =>
+      'كلمة المرور ضعيفة جدًا (الحد الأدنى 6 أحرف).';
+
+  @override
+  String get syncErrorInvalidEmail => 'صيغة البريد الإلكتروني غير صحيحة.';
+
+  @override
+  String get syncErrorAccountExistsDifferentProvider =>
+      'هذا البريد مرتبط بطريقة تسجيل دخول أخرى.';
+
+  @override
+  String get syncErrorGoogleCanceled => 'تم إلغاء تسجيل الدخول عبر Google.';
+
+  @override
+  String get syncErrorGoogleTokenMissing =>
+      'لم تُرجع Google رموز الدخول. حدّث ملفات الإعداد وأعد المحاولة.';
 
   @override
   String get syncErrorRetryHint =>
