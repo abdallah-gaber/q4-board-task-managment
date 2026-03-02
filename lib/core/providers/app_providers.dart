@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/local/hive_local_datasource.dart';
@@ -48,7 +49,14 @@ final _firebaseFirestoreProvider = Provider<FirebaseFirestore?>((ref) {
   if (!bootstrap.isAvailable) {
     return null;
   }
-  return FirebaseFirestore.instance;
+  final firestore = FirebaseFirestore.instance;
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
+    // This app already has Hive as local source of truth. Disabling Firestore
+    // persistence on macOS avoids LevelDB lock crashes when another app
+    // instance/session briefly overlaps during development.
+    firestore.settings = const Settings(persistenceEnabled: false);
+  }
+  return firestore;
 });
 
 final authServiceProvider = Provider<AuthService>((ref) {
