@@ -195,6 +195,7 @@ class BoardController extends StateNotifier<BoardState> {
     required String noteId,
     required QuadrantType toQuadrant,
     required int toIndex,
+    List<String>? visibleNoteIds,
   }) async {
     final current = _findNote(noteId);
     if (current == null) {
@@ -206,7 +207,12 @@ class BoardController extends StateNotifier<BoardState> {
         .where((n) => n.id != current.id)
         .toList(growable: false);
 
-    final clampedIndex = toIndex.clamp(0, target.length);
+    final clampedIndex = _resolveTargetIndex(
+      targetNotes: target,
+      toIndex: toIndex,
+      movingNoteId: current.id,
+      visibleNoteIds: visibleNoteIds,
+    );
     final updated = current.copyWith(
       quadrantType: toQuadrant,
       orderIndex: OrderIndex.forInsert(target, clampedIndex),
@@ -233,15 +239,31 @@ class BoardController extends StateNotifier<BoardState> {
     QuadrantType quadrant,
     int oldIndex,
     int newIndex,
+    List<String>? visibleNoteIds,
   ) async {
     final notes = state.orderedNotesForQuadrant(quadrant);
-    if (notes.isEmpty || oldIndex >= notes.length) {
+    if (notes.isEmpty) {
       return;
     }
 
+    final notesById = {for (final note in notes) note.id: note};
+    final visibleIds = (visibleNoteIds ?? notes.map((note) => note.id))
+        .where(notesById.containsKey)
+        .toList(growable: true);
+
+    if (visibleIds.isEmpty || oldIndex < 0 || oldIndex >= visibleIds.length) {
+      return;
+    }
+
+    final noteId = visibleIds.removeAt(oldIndex);
     final adjustedNew = oldIndex < newIndex ? newIndex - 1 : newIndex;
-    final note = notes[oldIndex];
-    await moveNote(noteId: note.id, toQuadrant: quadrant, toIndex: adjustedNew);
+    final clampedNew = adjustedNew.clamp(0, visibleIds.length);
+    await moveNote(
+      noteId: noteId,
+      toQuadrant: quadrant,
+      toIndex: clampedNew,
+      visibleNoteIds: visibleIds,
+    );
   }
 
   NoteEntity? _findNote(String id) {
@@ -259,6 +281,37 @@ class BoardController extends StateNotifier<BoardState> {
       return 0;
     }
     return notes.last.orderIndex + 1024;
+  }
+
+  int _resolveTargetIndex({
+    required List<NoteEntity> targetNotes,
+    required int toIndex,
+    required String movingNoteId,
+    List<String>? visibleNoteIds,
+  }) {
+    if (visibleNoteIds == null) {
+      return toIndex.clamp(0, targetNotes.length);
+    }
+
+    final targetIndexById = <String, int>{
+      for (var i = 0; i < targetNotes.length; i++) targetNotes[i].id: i,
+    };
+    final visibleIds = visibleNoteIds
+        .where((id) => id != movingNoteId && targetIndexById.containsKey(id))
+        .toList(growable: false);
+
+    if (visibleIds.isEmpty) {
+      return targetNotes.length;
+    }
+
+    final clampedVisibleIndex = toIndex.clamp(0, visibleIds.length);
+    if (clampedVisibleIndex == 0) {
+      return targetIndexById[visibleIds.first]!;
+    }
+    if (clampedVisibleIndex >= visibleIds.length) {
+      return targetIndexById[visibleIds.last]! + 1;
+    }
+    return targetIndexById[visibleIds[clampedVisibleIndex]]!;
   }
 
   Future<void> _normalizeIfNeeded(QuadrantType quadrant) async {

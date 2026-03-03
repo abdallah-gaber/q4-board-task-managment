@@ -10,10 +10,15 @@ import '../quadrant_ui.dart';
 import 'sticky_note_card.dart';
 
 class NoteDragData {
-  const NoteDragData({required this.noteId, required this.fromQuadrant});
+  const NoteDragData({
+    required this.noteId,
+    required this.fromQuadrant,
+    required this.fromVisibleIndex,
+  });
 
   final String noteId;
   final QuadrantType fromQuadrant;
+  final int fromVisibleIndex;
 }
 
 class QuadrantPanel extends StatefulWidget {
@@ -34,7 +39,7 @@ class QuadrantPanel extends StatefulWidget {
   final ValueChanged<NoteEntity> onEdit;
   final ValueChanged<NoteEntity> onDelete;
   final ValueChanged<NoteEntity> onToggleDone;
-  final void Function(String noteId, int toIndex) onDrop;
+  final void Function(NoteDragData dragData, int toIndex) onDrop;
 
   @override
   State<QuadrantPanel> createState() => _QuadrantPanelState();
@@ -51,7 +56,7 @@ class _QuadrantPanelState extends State<QuadrantPanel> {
     return DragTarget<NoteDragData>(
       onWillAcceptWithDetails: (_) => true,
       onAcceptWithDetails: (details) =>
-          widget.onDrop(details.data.noteId, widget.notes.length),
+          widget.onDrop(details.data, widget.notes.length),
       builder: (context, candidateData, rejectedData) {
         final isHovered = candidateData.isNotEmpty;
 
@@ -134,12 +139,13 @@ class _QuadrantPanelState extends State<QuadrantPanel> {
                               if (index.isEven) {
                                 final toIndex = index ~/ 2;
                                 return _DropSlot(
-                                  onAccept: (noteId) =>
-                                      widget.onDrop(noteId, toIndex),
+                                  onAccept: (dragData) =>
+                                      widget.onDrop(dragData, toIndex),
                                 );
                               }
 
-                              final note = widget.notes[(index - 1) ~/ 2];
+                              final noteIndex = (index - 1) ~/ 2;
+                              final note = widget.notes[noteIndex];
 
                               final feedbackCard = StickyNoteCard(
                                 note: note,
@@ -172,6 +178,7 @@ class _QuadrantPanelState extends State<QuadrantPanel> {
                                   data: NoteDragData(
                                     noteId: note.id,
                                     fromQuadrant: note.quadrantType,
+                                    fromVisibleIndex: noteIndex,
                                   ),
                                   dragAnchorStrategy: pointerDragAnchorStrategy,
                                   onDragStarted: () => _setDragging(note.id),
@@ -258,13 +265,13 @@ class _DragHandleVisual extends StatelessWidget {
 class _DropSlot extends StatelessWidget {
   const _DropSlot({required this.onAccept});
 
-  final ValueChanged<String> onAccept;
+  final ValueChanged<NoteDragData> onAccept;
 
   @override
   Widget build(BuildContext context) {
     return DragTarget<NoteDragData>(
       onWillAcceptWithDetails: (_) => true,
-      onAcceptWithDetails: (details) => onAccept(details.data.noteId),
+      onAcceptWithDetails: (details) => onAccept(details.data),
       builder: (context, candidateData, rejectedData) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 110),
@@ -286,7 +293,7 @@ class _EmptyQuadrantState extends StatelessWidget {
   const _EmptyQuadrantState({required this.quadrantType, required this.onDrop});
 
   final QuadrantType quadrantType;
-  final void Function(String noteId, int toIndex) onDrop;
+  final void Function(NoteDragData dragData, int toIndex) onDrop;
 
   @override
   Widget build(BuildContext context) {
@@ -295,7 +302,7 @@ class _EmptyQuadrantState extends StatelessWidget {
 
     return DragTarget<NoteDragData>(
       onWillAcceptWithDetails: (_) => true,
-      onAcceptWithDetails: (details) => onDrop(details.data.noteId, 0),
+      onAcceptWithDetails: (details) => onDrop(details.data, 0),
       builder: (context, candidateData, rejectedData) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 120),
