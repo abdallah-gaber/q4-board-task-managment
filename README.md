@@ -208,6 +208,7 @@ dart run flutter_native_splash:create
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md) for details.
 Deployment/setup checklist: [`docs/PHASE2_ROLLOUT_CHECKLIST.md`](docs/PHASE2_ROLLOUT_CHECKLIST.md)
+Security guidance: [`docs/SECURITY.md`](docs/SECURITY.md)
 
 ## Known Issues
 

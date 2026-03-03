@@ -201,14 +201,27 @@ class _BoardScreenState extends ConsumerState<BoardScreen>
       );
   }
 
-  Future<void> _onDrop(String noteId, QuadrantType quadrant, int index) async {
+  Future<void> _onDrop(
+    NoteDragData dragData,
+    QuadrantType quadrant,
+    int index,
+  ) async {
     final controller = ref.read(boardControllerProvider.notifier);
     final l10n = AppLocalizations.of(context)!;
+    final visibleNotes = ref
+        .read(boardControllerProvider)
+        .filteredNotesForQuadrant(quadrant);
+    var targetIndex = index;
+    if (dragData.fromQuadrant == quadrant &&
+        dragData.fromVisibleIndex < targetIndex) {
+      targetIndex -= 1;
+    }
 
     final undo = await controller.moveNote(
-      noteId: noteId,
+      noteId: dragData.noteId,
       toQuadrant: quadrant,
-      toIndex: index,
+      toIndex: targetIndex,
+      visibleNoteIds: visibleNotes.map((note) => note.id).toList(),
     );
     if (!mounted || undo == null) {
       return;
@@ -232,9 +245,17 @@ class _BoardScreenState extends ConsumerState<BoardScreen>
     int oldIndex,
     int newIndex,
   ) async {
+    final visibleNotes = ref
+        .read(boardControllerProvider)
+        .filteredNotesForQuadrant(quadrant);
     await ref
         .read(boardControllerProvider.notifier)
-        .reorderInQuadrant(quadrant, oldIndex, newIndex);
+        .reorderInQuadrant(
+          quadrant,
+          oldIndex,
+          newIndex,
+          visibleNotes.map((note) => note.id).toList(),
+        );
   }
 }
 
@@ -344,7 +365,8 @@ class _DesktopBoard extends StatelessWidget {
   final ValueChanged<NoteEntity> onEdit;
   final ValueChanged<NoteEntity> onDelete;
   final ValueChanged<NoteEntity> onToggleDone;
-  final void Function(String noteId, QuadrantType quadrant, int index) onDrop;
+  final void Function(NoteDragData dragData, QuadrantType quadrant, int index)
+  onDrop;
 
   @override
   Widget build(BuildContext context) {
@@ -363,7 +385,7 @@ class _DesktopBoard extends StatelessWidget {
             onEdit: onEdit,
             onDelete: onDelete,
             onToggleDone: onToggleDone,
-            onDrop: (noteId, toIndex) => onDrop(noteId, quadrant, toIndex),
+            onDrop: (dragData, toIndex) => onDrop(dragData, quadrant, toIndex),
           ),
       ],
     );
