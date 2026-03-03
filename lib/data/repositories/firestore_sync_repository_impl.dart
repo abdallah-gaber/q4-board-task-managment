@@ -47,41 +47,37 @@ class FirestoreSyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<SyncOperationResult> push() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      _emit(const SyncStatusSnapshot(code: SyncStatusCode.authRequired));
-      throw StateError('Authentication required.');
-    }
-
     _emit(const SyncStatusSnapshot(code: SyncStatusCode.pushing));
     try {
-      final localNotes = await _localNoteRepository.getAllNotes();
-      final remoteNotes = await _fetchRemoteNotes(uid);
-      final plan = NoteSyncMergePlanner.buildPushPlan(
-        localNotes: localNotes,
-        remoteNotes: remoteNotes,
-      );
+      return _withPermissionRetry((uid) async {
+        final localNotes = await _localNoteRepository.getAllNotes();
+        final remoteNotes = await _fetchRemoteNotes(uid);
+        final plan = NoteSyncMergePlanner.buildPushPlan(
+          localNotes: localNotes,
+          remoteNotes: remoteNotes,
+        );
 
-      await _commitPushPlan(uid, plan);
+        await _commitPushPlan(uid, plan);
 
-      final now = DateTime.now();
-      _emit(
-        SyncStatusSnapshot(
-          code: SyncStatusCode.success,
-          lastMessage: plan.skippedConflicts > 0
-              ? 'push_conflicts_skipped'
-              : 'push_complete',
-          lastSuccessAt: now,
-        ),
-      );
+        final now = DateTime.now();
+        _emit(
+          SyncStatusSnapshot(
+            code: SyncStatusCode.success,
+            lastMessage: plan.skippedConflicts > 0
+                ? 'push_conflicts_skipped'
+                : 'push_complete',
+            lastSuccessAt: now,
+          ),
+        );
 
-      return SyncOperationResult(
-        upserts: plan.upserts.length,
-        deletes: plan.deletes.length,
-        skippedConflicts: plan.skippedConflicts,
-        didMutate: plan.upserts.isNotEmpty || plan.deletes.isNotEmpty,
-        conflictNoteIds: plan.skippedConflictNoteIds,
-      );
+        return SyncOperationResult(
+          upserts: plan.upserts.length,
+          deletes: plan.deletes.length,
+          skippedConflicts: plan.skippedConflicts,
+          didMutate: plan.upserts.isNotEmpty || plan.deletes.isNotEmpty,
+          conflictNoteIds: plan.skippedConflictNoteIds,
+        );
+      });
     } catch (error) {
       _emit(
         SyncStatusSnapshot(
@@ -96,15 +92,11 @@ class FirestoreSyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<SyncOperationResult> pull() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      _emit(const SyncStatusSnapshot(code: SyncStatusCode.authRequired));
-      throw StateError('Authentication required.');
-    }
-
     _emit(const SyncStatusSnapshot(code: SyncStatusCode.pulling));
     try {
-      return _pullFromRemote(uid: uid, source: 'manual');
+      return _withPermissionRetry(
+        (uid) => _pullFromRemote(uid: uid, source: 'manual'),
+      );
     } catch (error) {
       _emit(
         SyncStatusSnapshot(
@@ -420,6 +412,39 @@ class FirestoreSyncRepositoryImpl implements SyncRepository {
   void _emit(SyncStatusSnapshot snapshot) {
     _latest = snapshot;
     _statusController.add(snapshot);
+  }
+
+  Future<T> _withPermissionRetry<T>(
+    Future<T> Function(String uid) operation,
+  ) async {
+    final currentUid = _auth.currentUser?.uid;
+    if (currentUid == null) {
+      _emit(const SyncStatusSnapshot(code: SyncStatusCode.authRequired));
+      throw StateError('Authentication required.');
+    }
+
+    try {
+      return await operation(currentUid);
+    } on FirebaseException catch (error) {
+      if (error.code != 'permission-denied') {
+        rethrow;
+      }
+      final refreshedUid = await _refreshAuthAndGetUid();
+      if (refreshedUid == null) {
+        _emit(const SyncStatusSnapshot(code: SyncStatusCode.authRequired));
+        throw StateError('Authentication required.');
+      }
+      return operation(refreshedUid);
+    }
+  }
+
+  Future<String?> _refreshAuthAndGetUid() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return null;
+    }
+    await user.getIdToken(true);
+    return _auth.currentUser?.uid;
   }
 }
 
